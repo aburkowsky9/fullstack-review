@@ -18,7 +18,7 @@ let repoSchema = new mongoose.Schema({
 
 let Repo = mongoose.model('Repo', repoSchema);
 
-let save = (data, cb) => {
+const save = (data, cb) => {
   // TODO: Your code here
   // This function should save a repo or repos to
   // the MongoDB
@@ -34,16 +34,32 @@ let save = (data, cb) => {
           repoName: repo.name,
           url: repo.html_url,
           forks: repo.forks
-        }, function(err, docs) {
+        }, function(err, result) {
           if (err) {
             cb(err);
           } else {
-            cb(null, docs);
+            cb(null, result);
           }
         });
+      } else {
+        cb(null, 'Username already added!');
       }
     });
   });
 }
 
+const findTop25 = (cb) => {
+  Repo.find({})
+      .sort('-forks')
+      .limit(25)
+      .exec((err, data) => {
+        if (err) {
+          cb(err);
+        } else {
+          cb(null, data);
+        }
+      });
+}
+
 module.exports.save = save;
+module.exports.findTop25 = findTop25;

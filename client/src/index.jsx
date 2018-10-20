@@ -1,8 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import $ from 'jquery';
 import Search from './components/Search.jsx';
 import RepoList from './components/RepoList.jsx';
+import Requests from './requests.js'
+import Repos from './components/Repos.jsx'
 
 class App extends React.Component {
   constructor(props) {
@@ -10,34 +11,35 @@ class App extends React.Component {
     this.state = { 
       repos: []
     }
-
+    this.search = this.search.bind(this);
+    this.getTopRepos = this.getTopRepos.bind(this);
   }
 
-  search (term) {
-    console.log(`${term} was searched`);
-    // TODO
-    var request = $.ajax({
-      method: "POST",
-      url: '/repos',
-      data: {data: term}
-    });
-
-    request.done(function( msg ) {
-      $( "#log" ).html( msg );
-      this.setStat
-    });
-     
-    request.fail(function( jqXHR, textStatus ) {
-      console.log(jqXHR);
-      alert( "Request failed: " + textStatus );
+  componentDidMount() {
+    Requests.read((data) => {
+      this.setState({repos: data});
     });
   }
 
-  render () {
+  search(term) {
+    Requests.create(term, (msg) => {
+      console.log('in search!', msg)
+      this.getTopRepos();
+    })
+  }
+
+  getTopRepos() {
+    console.log('here in getTopRepos');
+    Requests.read((data) => {
+      this.setState({repos: data});
+    });
+  }
+
+  render() {
     return (<div>
       <h1>Github Fetcher</h1>
       <RepoList repos={this.state.repos}/>
-      <Search onSearch={this.search.bind(this)}/>
+      <Search onSearch={this.search}/>
     </div>)
   }
 }

@@ -6,8 +6,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 const githubSearch = require('../helpers/github.js');
 
-console.log(db);
-
 app.use(express.static(__dirname + '/../client/dist'));
 
 app.post('/repos', function (req, res) {
@@ -23,9 +21,14 @@ app.post('/repos', function (req, res) {
 		} else {
 			db.save(data, (err, result) => {
 				if ('ERROR: ', err) {
-					console.error(err);
+					console.log(err);
+					res.status(500).end();
+				} else if(result.constructor === String) {
+					//find way to send custom message with 400!
+					res.status(400).send();
 				} else {
-					console.log('RESULT: ', result)
+					console.log('RESULT: ', result);
+					res.status(200).end('Added to db!');
 				}
 			})
 		}
@@ -33,8 +36,16 @@ app.post('/repos', function (req, res) {
 
 });
 
+
 app.get('/repos', function (req, res) {
-	// console.log(req.body)
+	console.log(req.body)
+	db.findTop25((err, data) => {
+		if (err) {
+			res.status(400).send(err);
+		} else {
+			res.json(data);
+		}
+	})
   // TODO - your code here!
   // This route should send back the top 25 repos
 });
