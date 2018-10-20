@@ -11,13 +11,25 @@ console.log(db);
 app.use(express.static(__dirname + '/../client/dist'));
 
 app.post('/repos', function (req, res) {
-	console.log('Req: ', req.body.data);
-	var username = req.body.data;
-	githubSearch.getReposByUsername(username);
   // TODO - your code here!
   // This route should take the github username provided
   // and get the repo information from the github API, then
   // save the repo information in the database
+	// console.log('Req: ', req.body.data);
+	var username = req.body.data;
+	githubSearch.getReposByUsername(username, (err, data) => {
+		if(err) {
+			return console.error(err);
+		} else {
+			db.save(data, (err, result) => {
+				if ('ERROR: ', err) {
+					console.error(err);
+				} else {
+					console.log('RESULT: ', result)
+				}
+			})
+		}
+	});
 
 });
 

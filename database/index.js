@@ -9,6 +9,7 @@ db.on('error', console.error.bind(console, 'connection error: '));
 
 let repoSchema = new mongoose.Schema({
   // TODO: your schema here!
+  repoId: Number,
   repoOwner: String,
   repoName: String,
   url: String,
@@ -17,15 +18,31 @@ let repoSchema = new mongoose.Schema({
 
 let Repo = mongoose.model('Repo', repoSchema);
 
-let save = (model) => {
+let save = (data, cb) => {
   // TODO: Your code here
   // This function should save a repo or repos to
   // the MongoDB
-  model.save((err, result) => {
-  	if (err) {
-  		return console.error(err);
-  	} 
-  	console.log('success: ', result);
+  data.forEach((repo) => {
+
+    Repo.find({repoId: repo.id}, function(err, docs) {
+      if (err) {
+        callback(err);
+      } else if (docs.length === 0) {
+        Repo.create({ 
+          repoId: repo.id, 
+          repoOwner:repo.owner.login,
+          repoName: repo.name,
+          url: repo.html_url,
+          forks: repo.forks
+        }, function(err, docs) {
+          if (err) {
+            cb(err);
+          } else {
+            cb(null, docs);
+          }
+        });
+      }
+    });
   });
 }
 
